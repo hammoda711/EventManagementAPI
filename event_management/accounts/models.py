@@ -56,7 +56,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
 
 class HostProfile(models.Model):
-    user = models.OneToOneField(CustomUser, on_delete=models.SET_NULL, null=True)
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
     organization = models.CharField(max_length=255)
 
     def __str__(self):

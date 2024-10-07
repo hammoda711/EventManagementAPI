@@ -3,14 +3,12 @@ from rest_framework.generics import CreateAPIView,RetrieveUpdateDestroyAPIView,L
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
-from django.contrib.auth import authenticate
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from rest_framework.views import APIView
 from django.contrib.auth import get_user_model
 from accounts.models import HostProfile
 from .serializers import HostProfileSerializer, RegistrationSerializer, UserProfileSerializer
 from .permissions import IsOwner, IsSuperUser, IsSuperUserOrOwner
-from accounts import serializers
+from rest_framework.exceptions import ValidationError
 # Create your views here.
 
 
@@ -43,16 +41,21 @@ class UserProfileView(ListAPIView,RetrieveUpdateDestroyAPIView):
     """
     Allow a user to view, update, and delete their profile.
     """
-    queryset = User.objects.all()
     serializer_class = UserProfileSerializer
     permission_classes = [IsAuthenticated, IsOwner]  # Allow owner or superuser to delete
 
     lookup_field = 'username'  # Use username for lookups
 
-    def delete(self, request, *args, **kwargs):
+
+    def get_queryset(self):
+            #Restrict host profile retrieval to the authenticated user only.
+            return User.objects.filter(id=self.request.user.id)
+
+
+    def destroy(self, request, *args, **kwargs):
         # allow superusers to delete any profile.
         self.permission_classes = [IsSuperUserOrOwner]  # Use custom permission for delete
-        return super().delete(request, *args, **kwargs)
+        return super().destroy(request, *args, **kwargs)
 
 
 class UserListView(ListAPIView):
@@ -63,6 +66,7 @@ class UserListView(ListAPIView):
     serializer_class = UserProfileSerializer
     permission_classes = [IsAuthenticated,IsSuperUser]
 
+     
 
 class HostProfileViewSet(viewsets.ModelViewSet):
     """
@@ -70,16 +74,18 @@ class HostProfileViewSet(viewsets.ModelViewSet):
     """
     serializer_class = HostProfileSerializer
     permission_classes = [IsAuthenticated,IsOwner]
-
+    lookup_field = 'user__username' 
 
     def get_queryset(self):
         #Restrict host profile retrieval to the authenticated user only.
+        if self.request.user.is_superuser:
+            return HostProfile.objects.all()
         return HostProfile.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
         # Ensure that the logged-in user is assigned to the host profile
         if HostProfile.objects.filter(user=self.request.user).exists():
-            raise serializers.ValidationError("Host profile already exists.")
+            raise ValidationError("Host profile already exists.")
         serializer.save(user=self.request.user)
     
     def destroy(self, request, *args, **kwargs):
@@ -93,6 +99,10 @@ class HostListView(ListAPIView):
     """
     Allow superuser to view all Hosts profiles.
     """
-    queryset = HostProfile.objects.all()
     serializer_class = HostProfileSerializer
     permission_classes = [IsAuthenticated,IsSuperUser]
+
+    
+    def get_queryset(self):
+        # Only return users that have a HostProfile
+        return HostProfile.objects.all()

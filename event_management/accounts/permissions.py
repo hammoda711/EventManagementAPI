@@ -1,12 +1,24 @@
 from rest_framework.permissions import BasePermission
 
+
 class IsOwner(BasePermission):
-    """
-    Custom permission to only allow users to access and modify their own profile.
-    """
+
     def has_object_permission(self, request, view, obj):
-        # Check if the user is the owner of the object (their own profile)
-        return obj.id == request.user.id
+        # Check if the object has an 'id' attribute
+        if hasattr(obj, 'id'):
+            # Allow access if the object ID matches the user's ID or if the user is a superuser
+            if obj.id == request.user.id:
+                return True
+        
+        # Check if the object has a 'user' attribute
+        if hasattr(obj, 'user'):
+            # Allow access if the logged-in user is the owner or a superuser
+            if request.user == obj.user:
+                return True
+
+        # If neither condition is met, deny access
+        return False
+    
 
 class IsSuperUser(BasePermission):
     """
@@ -17,16 +29,23 @@ class IsSuperUser(BasePermission):
         return request.user.is_superuser
     
 
-from rest_framework.permissions import BasePermission
 
 class IsSuperUserOrOwner(BasePermission):
     """
     Custom permission to only allow superusers or owners to perform actions.
     """
     def has_object_permission(self, request, view, obj):
-        # Allow access if the user is a superuser or the owner of the object
-        return request.user.is_superuser or obj == request.user
+        # Check if the object has an 'id' attribute
+        if hasattr(obj, 'id'):
+            # Allow access if the object ID matches the user's ID or if the user is a superuser
+            if obj.id == request.user.id or request.user.is_superuser:
+                return True
+        
+        # Check if the object has a 'user' attribute
+        if hasattr(obj, 'user'):
+            # Allow access if the logged-in user is the owner or a superuser
+            if request.user == obj.user or request.user.is_superuser:
+                return True
 
-    #def has_permission(self, request, view):
-        # You can add any additional logic for general actions here if needed
-    #   return True  # Allow all authenticated users to access this view
+        # If neither condition is met, deny access
+        return False

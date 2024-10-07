@@ -58,9 +58,12 @@ class HostProfileSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         # Create a new HostProfile for the user
-        request_user = self.context['request'].user  # Get the logged-in user
+        # Get the logged-in user
+        request_user = self.context['request'].user  
+        # Check if the user already has a host profile
         if HostProfile.objects.filter(user=request_user).exists():
             raise serializers.ValidationError("Host profile already exists.")
+            
         return HostProfile.objects.create(**validated_data)
 
     def update(self, instance, validated_data):
