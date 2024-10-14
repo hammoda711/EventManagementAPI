@@ -25,7 +25,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
-    events_attending = EventSerializer(many=True, read_only=True)
+    events_attending = EventSerializer(many=True, read_only=True, source='events_attending')
     class Meta:
         model = User
         fields = ['id', 'email', 'username', 'first_name', 'last_name','image','events_attending']
@@ -52,7 +52,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
 class HostProfileSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username', read_only=True)
-    events_hosted = EventSerializer(many=True, read_only=True, source='event_host')
+    events_hosted = EventSerializer(many=True, read_only=True, source='events_hosted')
     class Meta:
         model = HostProfile
         fields = ['organization','username','events_hosted']

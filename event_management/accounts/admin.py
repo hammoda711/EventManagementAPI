@@ -12,6 +12,7 @@ User = get_user_model()  # Get the user model
 class CustomUserAdmin(BaseUserAdmin):
     model = User
     list_display = ('email', 'username', 'first_name', 'last_name', 'is_staff','is_active')
+    list_filter = ('is_staff', 'is_active')
     fieldsets = (
         (None, {'fields': ('email', 'username', 'password')}),
         ('Personal Info', {'fields': ('first_name', 'last_name')}),
@@ -24,6 +25,7 @@ class CustomUserAdmin(BaseUserAdmin):
         ),
     )
     ordering = ('email',)
+    filter_horizontal = []
 
     def delete_model(self, request, obj):
         """

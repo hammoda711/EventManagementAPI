@@ -1,21 +1,31 @@
 from datetime import timezone
 from django.db import models
-
+from django.core.validators import MaxValueValidator
 from accounts.models import HostProfile
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 # Create your models here.
 class Event(models.Model):
-    host = models.ForeignKey('accounts.HostProfile', on_delete=models.CASCADE, related_name='event_host') #will be used in source in the host serializer
+    #host = models.ForeignKey('accounts.HostProfile', on_delete=models.CASCADE, related_name='hosted_events') #will be used in source in the host serializer
     title = models.CharField(max_length=255)
     description = models.TextField()
     date_time = models.DateTimeField()
     location = models.CharField(max_length=255)
-    organizer = models.ForeignKey(HostProfile, on_delete=models.CASCADE, related_name='events')
-    capacity = models.PositiveIntegerField()
+    capacity = models.PositiveIntegerField(validators=[MaxValueValidator(3)])
     created_date = models.DateTimeField(auto_now_add=True)
+    
+
+
+    # One-to-many relationship with HostProfile
+    host = models.ForeignKey(HostProfile, on_delete=models.CASCADE, related_name='events_hosted')
+    
+    # Many-to-many relationship with CustomUser
+    attendees = models.ManyToManyField(User, related_name='events_attending')
 
     def __str__(self):
-        return f"{self.title} hosted by {self.host}"
+        return f"{self.title} hosted by {self.host.user.username} from {self.host.organization}"
     
 
     def save(self, *args, **kwargs):

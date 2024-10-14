@@ -36,7 +36,7 @@ class CustomUserManager(BaseUserManager):
         return self.create_user(email, username, password, **extra_fields)
     
 
-class CustomUser(AbstractBaseUser):
+class CustomUser(AbstractBaseUser,PermissionsMixin):
     email = models.EmailField(_('email address'), unique=True)  # Email is unique
     username = models.CharField(max_length=150, unique=True)
     first_name = models.CharField(max_length=30, blank=True)
@@ -44,9 +44,7 @@ class CustomUser(AbstractBaseUser):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     image = models.ImageField(upload_to='media/user_images', null=True, blank=True)
-    
-    events_attending = models.ManyToManyField('events.Event', related_name='attendees')
-    
+        
     objects = CustomUserManager()
 
     USERNAME_FIELD = 'email'  # Email is the unique identifier
@@ -60,7 +58,6 @@ class CustomUser(AbstractBaseUser):
 class HostProfile(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
     organization = models.CharField(max_length=255)
-    events_hosted = models.ForeignKey('events.Event', on_delete=models.CASCADE, related_name='host')
     
     def __str__(self):
         return f"{self.user.username} - {self.organization}"
