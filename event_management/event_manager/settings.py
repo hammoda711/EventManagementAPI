@@ -39,7 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    # my apps 
+    # my apps
+    'events',
     'rest_framework',  # Django REST Framework
     'rest_framework_simplejwt',  # JWT Authentication
     'corsheaders',  # CORS Headers

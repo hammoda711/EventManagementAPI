@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-
+from events.serializers import EventSerializer
 from accounts.models import HostProfile
 
 User = get_user_model()
@@ -25,9 +25,10 @@ class RegistrationSerializer(serializers.ModelSerializer):
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
+    events_attending = EventSerializer(many=True, read_only=True)
     class Meta:
         model = User
-        fields = ['id', 'email', 'username', 'first_name', 'last_name','image']
+        fields = ['id', 'email', 'username', 'first_name', 'last_name','image','events_attending']
         read_only_fields = ['id']  
         extra_kwargs = {
             'password': {'write_only': True},
@@ -51,9 +52,10 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
 class HostProfileSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username', read_only=True)
+    events_hosted = EventSerializer(many=True, read_only=True, source='event_host')
     class Meta:
         model = HostProfile
-        fields = ['organization','username']
+        fields = ['organization','username','events_hosted']
         read_only_fields = ['username']  # Ensure user cannot be modified
 
     def create(self, validated_data):

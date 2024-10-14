@@ -37,12 +37,12 @@ class RegistrationView(CreateAPIView):
 
 
 
-class UserProfileView(ListAPIView,RetrieveUpdateDestroyAPIView):
+class UserProfileView(RetrieveUpdateDestroyAPIView):
     """
     Allow a user to view, update, and delete their profile.
     """
     serializer_class = UserProfileSerializer
-    permission_classes = [IsAuthenticated, IsOwner]  # Allow owner or superuser to delete
+    permission_classes = [IsAuthenticated, IsOwner]
 
     lookup_field = 'username'  # Use username for lookups
 
@@ -60,7 +60,7 @@ class UserProfileView(ListAPIView,RetrieveUpdateDestroyAPIView):
 
 class UserListView(ListAPIView):
     """
-    Allow superuser to view all user profiles.
+    allow only superuser to view all user profiles.
     """
     queryset = User.objects.all()
     serializer_class = UserProfileSerializer
@@ -70,16 +70,14 @@ class UserListView(ListAPIView):
 
 class HostProfileViewSet(viewsets.ModelViewSet):
     """
-    A viewset for viewing and editing host profile instances.
+    A viewset for viewing, editing, and deleting host profile instances.
     """
     serializer_class = HostProfileSerializer
     permission_classes = [IsAuthenticated,IsOwner]
     lookup_field = 'user__username' 
 
     def get_queryset(self):
-        #Restrict host profile retrieval to the authenticated user only.
-        if self.request.user.is_superuser:
-            return HostProfile.objects.all()
+        #allow host user to retrieve only his host profile
         return HostProfile.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
@@ -92,17 +90,16 @@ class HostProfileViewSet(viewsets.ModelViewSet):
       #only super user or owner can delete profile
         self.permission_classes = [IsSuperUserOrOwner] 
         return super().destroy(request, *args, **kwargs)
-
-
+    
 
 class HostListView(ListAPIView):
     """
-    Allow superuser to view all Hosts profiles.
+    Allow only superuser to view all host profiles.
     """
     serializer_class = HostProfileSerializer
     permission_classes = [IsAuthenticated,IsSuperUser]
 
     
     def get_queryset(self):
-        # Only return users that have a HostProfile
+        # Only admin can get the list of all users that have a HostProfile
         return HostProfile.objects.all()
