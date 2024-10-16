@@ -20,5 +20,6 @@
     },
     "peacock.color": "#222225",
     "python.analysis.typeCheckingMode": "off",
-    "python.analysis.autoImportCompletions": true
+    "python.analysis.autoImportCompletions": true,
+    "python.pythonPath": "E:\\alx_back_end\\SocialMediaAPI\\venv\\Scripts\\python.exe"
 }

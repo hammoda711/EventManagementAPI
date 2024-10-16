@@ -49,3 +49,38 @@ class IsSuperUserOrOwner(BasePermission):
 
         # If neither condition is met, deny access
         return False
+
+class IsSuperUserOrHost(BasePermission):
+    """
+    Custom permission to only allow superusers or hosts to access a view.
+    """
+
+    def has_permission(self, request, view):
+        # Check if the user is a superuser
+        if request.user and request.user.is_superuser:
+            return True
+        
+        # Check if the user is a host
+        if request.user and hasattr(request.user, 'hostprofile'):
+            return True
+        
+        # Deny access if neither condition is met
+        return False
+
+class IsEventHost(BasePermission):
+    """
+    Custom permission to only allow users who are hosts and also
+    the host of the event to access the event.
+    """
+
+    def has_object_permission(self, request, view, obj):
+        # Check if the user is authenticated
+        if not request.user.is_authenticated:
+            return False
+
+        # Check if the user has a HostProfile
+        if not hasattr(request.user, 'hostprofile'):
+            return False
+
+        # Check if the user is the host of the event
+        return obj.host.user == request.user

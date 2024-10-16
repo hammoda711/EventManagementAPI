@@ -27,3 +27,16 @@ class EventSerializer(serializers.ModelSerializer):
         if value < timezone.now():
             raise serializers.ValidationError("Event cannot be scheduled in the past.")
         return value
+
+    def validate_capacity(self, value):
+        # Ensure capacity is a positive integer
+        if value <= 0:
+            raise serializers.ValidationError("Event capacity must be a positive number.")
+        return value
+    
+    def validate_title(self, value):
+        if not value:
+            raise serializers.ValidationError("Title cannot be empty.")
+        if len(value) < 5:
+            raise serializers.ValidationError("Title must be at least 5 characters long.")
+        return value

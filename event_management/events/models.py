@@ -3,6 +3,7 @@ from django.db import models
 from django.core.validators import MaxValueValidator
 from accounts.models import HostProfile
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 
 User = get_user_model()
 
@@ -13,14 +14,10 @@ class Event(models.Model):
     description = models.TextField()
     date_time = models.DateTimeField()
     location = models.CharField(max_length=255)
-    capacity = models.PositiveIntegerField(validators=[MaxValueValidator(3)])
+    capacity = models.PositiveIntegerField(validators=[MaxValueValidator(50)])
     created_date = models.DateTimeField(auto_now_add=True)
-    
-
-
     # One-to-many relationship with HostProfile
     host = models.ForeignKey(HostProfile, on_delete=models.CASCADE, related_name='events_hosted')
-    
     # Many-to-many relationship with CustomUser
     attendees = models.ManyToManyField(User, related_name='events_attending')
 
@@ -31,7 +28,7 @@ class Event(models.Model):
     def save(self, *args, **kwargs):
         # Ensure the event is not scheduled in the past
         if self.date_time < timezone.now():
-            raise ValueError("Event cannot be scheduled in the past.")
+            raise ValidationError("Event cannot be scheduled in the past.")
         super(Event, self).save(*args, **kwargs)
 
     def decrease_capacity(self):
@@ -40,4 +37,4 @@ class Event(models.Model):
             self.capacity -= 1
             self.save()
         else:
-            raise ValueError("No available spots left for this event.")
+            raise ValidationError("No available spots left for this event.")

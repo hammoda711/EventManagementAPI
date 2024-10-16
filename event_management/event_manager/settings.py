@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'rest_framework',  # Django REST Framework
     'rest_framework_simplejwt',  # JWT Authentication
     'corsheaders',  # CORS Headers
+    'django_filters',
     
 
 ]
@@ -157,6 +158,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.AllowAny',
     ],
+    'EXCEPTION_HANDLER': 'path.to.custom_exception_handler',
 }
 
 
