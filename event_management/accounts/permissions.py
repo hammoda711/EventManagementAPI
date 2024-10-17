@@ -67,6 +67,7 @@ class IsSuperUserOrHost(BasePermission):
         # Deny access if neither condition is met
         return False
 
+from rest_framework.exceptions import PermissionDenied
 class IsEventHost(BasePermission):
     """
     Custom permission to only allow users who are hosts and also
@@ -74,13 +75,12 @@ class IsEventHost(BasePermission):
     """
 
     def has_object_permission(self, request, view, obj):
-        # Check if the user is authenticated
-        if not request.user.is_authenticated:
-            return False
-
         # Check if the user has a HostProfile
         if not hasattr(request.user, 'hostprofile'):
-            return False
+            raise PermissionDenied("User does not have a HostProfile.")
 
         # Check if the user is the host of the event
-        return obj.host.user == request.user
+        if obj.host.user != request.user:
+            raise PermissionDenied("You are not the host of this event.")
+
+        return True

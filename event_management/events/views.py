@@ -8,7 +8,8 @@ from django.utils import timezone
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
-from django_filters.rest_framework import DjangoFilterBackend, SearchFilter
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import SearchFilter
 
 from rest_framework.exceptions import ValidationError
 
@@ -18,6 +19,10 @@ class EventRegistrationView(APIView):
     def post(self, request, *args, **kwargs):
         event_id = self.kwargs.get('event_id')
         event = get_object_or_404(Event, id=event_id)
+
+        # Check if the user is already registered for the event
+        if request.user in event.attendees.all():
+            return Response({"message": "You are already registered for this meeting."}, status=status.HTTP_400_BAD_REQUEST)
 
         if event.capacity > 0:
             event.attendees.add(request.user)
@@ -58,14 +63,12 @@ class UpdateRetrieveEventView(generics.RetrieveUpdateAPIView):
     Retrieve or update an event only if the user is the host of the event.
     """
     serializer_class = EventSerializer
-    permission_classes = [IsAuthenticated, IsEventHost]  # Ensure the user is authenticated and is a host
+    permission_classes = [IsAuthenticated, IsEventHost ]  # Ensure the user is authenticated and is a host
 
     def get_queryset(self):
         # Get all events hosted by the user
         user = self.request.user
-        return Event.objects.filter(host__user=user)  # Assuming host is a ForeignKey to HostProfile
-    #PATCH /events/<event_id>/
-    #GET /events/<event_id>/
+        return Event.objects.filter(host__user=user)
     #we may need perform_update for notification
 
 
@@ -86,8 +89,18 @@ class UserUpcomingEventsView(generics.ListAPIView):
         # Return upcoming events that the user is attending
         return Event.objects.filter(attendees=user, date_time__gt=timezone.now()).order_by('-created_date')
 
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
 
+        # Modify the response to exclude 'attendees'
+        response_data = serializer.data
+        for event in response_data:
+            event.pop('attendees', None)  # Remove the attendees field if it exists
 
+        return Response(response_data)
+
+from rest_framework.exceptions import PermissionDenied
 class HostsUpcomingEventsView(generics.ListAPIView):
     """
     List all upcoming events for hosts.
@@ -102,12 +115,14 @@ class HostsUpcomingEventsView(generics.ListAPIView):
     def get_queryset(self):
         # Get the user from the request
         user = self.request.user
+        if not hasattr(user, 'hostprofile'):
+            raise PermissionDenied("You are not a host and cannot access this view.")
         # Return all upcoming events hosted by the user
-        return Event.objects.filter(host=user, date_time__gt=timezone.now()).order_by('-created_date')
+        return Event.objects.filter(host__user=user, date_time__gt=timezone.now()).order_by('-created_date')
     
 
 
-class ListAllEventsView(generics.ListAPIView):
+class EventsListView(generics.ListAPIView):
     queryset = Event.objects.all().order_by('-created_date')
     serializer_class = EventSerializer
     permission_classes = [IsAuthenticated, IsSuperUser]

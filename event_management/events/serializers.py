@@ -1,4 +1,4 @@
-from datetime import timezone
+from django.utils import timezone
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from .models import Event
@@ -15,7 +15,9 @@ class AttendeeSerializer(serializers.ModelSerializer):
 class EventSerializer(serializers.ModelSerializer):
     #attendees = UserProfileSerializer(many=True, read_only=True)
     host = serializers.CharField(source='host.user.username', read_only=True)
-    attendees = AttendeeSerializer(many=True, read_only=True)  # Use AttendeeSerializer for attendees
+    attendees = AttendeeSerializer(many=True, read_only=True)
+    date_time = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S', required=True)
+    created_date = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S', read_only=True)
 
     class Meta:
         model = Event
@@ -40,3 +42,4 @@ class EventSerializer(serializers.ModelSerializer):
         if len(value) < 5:
             raise serializers.ValidationError("Title must be at least 5 characters long.")
         return value
+
