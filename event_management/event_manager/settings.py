@@ -159,7 +159,7 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.AllowAny',
     ],
     #'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
-    'EXCEPTION_HANDLER': 'rest_framework.views.exception_handler',
+    'EXCEPTION_HANDLER': 'events.exceptions.custom_exception_handler',
 }
 
 

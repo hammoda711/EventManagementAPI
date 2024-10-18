@@ -10,8 +10,8 @@ from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
-
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import ValidationError, PermissionDenied
 
 class EventRegistrationView(APIView):
     permission_classes = [IsAuthenticated]
@@ -55,6 +55,7 @@ class DeleteEventView(generics.DestroyAPIView):
         if user.is_superuser:
             return Event.objects.all()  # Superusers can delete any event
         return Event.objects.filter(host__user=user)
+    
 
 
 
@@ -100,7 +101,6 @@ class UserUpcomingEventsView(generics.ListAPIView):
 
         return Response(response_data)
 
-from rest_framework.exceptions import PermissionDenied
 class HostsUpcomingEventsView(generics.ListAPIView):
     """
     List all upcoming events for hosts.

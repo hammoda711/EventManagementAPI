@@ -67,14 +67,18 @@ class IsSuperUserOrHost(BasePermission):
         # Deny access if neither condition is met
         return False
 
-from rest_framework.exceptions import PermissionDenied
+
+from rest_framework.exceptions import ValidationError, PermissionDenied
 class IsEventHost(BasePermission):
     """
     Custom permission to only allow users who are hosts and also
     the host of the event to access the event.
     """
-
     def has_object_permission(self, request, view, obj):
+        # Check if the user is authenticated (this is generally handled by IsAuthenticated)
+        if not request.user.is_authenticated:
+            raise PermissionDenied("User is not authenticated.")
+
         # Check if the user has a HostProfile
         if not hasattr(request.user, 'hostprofile'):
             raise PermissionDenied("User does not have a HostProfile.")
