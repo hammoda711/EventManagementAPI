@@ -8,6 +8,4 @@ Summary of Relationships
 The following diagram illustrates the relationships between the core models (User, HostProfile, and Event) :
 
 
-![ERD Diagram](docs/ERD.png)
-
-For a detailed view, check the [ERD document](docs/ERD.png).
+![ERD Diagram](event_management/docs/ERD.png)
