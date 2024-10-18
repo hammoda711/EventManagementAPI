@@ -101,7 +101,7 @@ The **Event Management System** is a web application designed to help users crea
 
 ## ERD
 
-- [Entity Relationship Diagram (ERD)](docs/ERD.md)
+- [Entity Relationship Diagram (ERD)](event_management/docs/ERD.md)
 
 ## Contributing
 Feel free to open issues or pull requests if you find any bugs or have suggestions for improvements.
