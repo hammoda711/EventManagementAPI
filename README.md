@@ -64,9 +64,7 @@ The **Event Management System** is a web application designed to help users crea
    ```
 
 ## API Endpoints
-Provide your endpoints here. Example format:
 
- Accounts App Endpoints
 
 - **User Endpoints**:
   
@@ -91,7 +89,7 @@ Provide your endpoints here. Example format:
   - `POST /login/` - User login
   - `POST /logout/` - User logout
 
-### **Events App Endpoints**:
+- **Events App Endpoints**:
 
 - `POST api/events/create/` - Create a new event
 - `DELETE api/events/{pk}/delete/` - Delete a specific event
